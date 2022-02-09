@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const express = require('express');
 const path = require("path");
+const { emitKeypressEvents } = require('readline');
 
 const app = express();
 app.use(express.urlencoded({extended: false }));
@@ -33,7 +34,7 @@ app.post('/add', function(req,res){
 // View
   app.post('/view', function(req,res){
     db.serialize(()=>{
-      db.each('SELECT id ID, name NAME FROM emp WHERE id =?', [req.body.id], function(err,row){     //db.each() is only one which is funtioning while reading data from the DB
+      db.each('SELECT id ID, name NAME FROM emp WHERE id =?', [req.body.id], function(err,row){     
         if(err){
           res.send("Error encountered while displaying");
           return console.error(err.message);
@@ -67,6 +68,15 @@ app.post('/delete', function(req,res){
         res.send("Entry deleted");
         console.log("Entry deleted");
       });
+    });
+  });
+  //Show All
+  app.post('/showAll', function(req,res){
+  db.serialize(()=>{
+  db.each("SELECT * FROM emp", function (err,row) {
+    console.log("Read  from DB : " + row.id + " : " + row.name );
+     });
+     res.send(`results in terminal window `);
     });
   });
   //Close
