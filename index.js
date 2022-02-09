@@ -1,10 +1,10 @@
-var sqlite3 = require('sqlite3').verbose();
-var express = require('express');
-var http = require('http');
-var path = require("path");
+const sqlite3 = require('sqlite3').verbose();
+const express = require('express');
+const path = require("path");
 
-var app = express();
-var server = http.createServer(app);
+const app = express();
+app.use(express.urlencoded({extended: false }));
+app.use(express.static(path.join(__dirname,'./public')));
 
 let db = new sqlite3.Database('./database/employees.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
@@ -13,15 +13,11 @@ let db = new sqlite3.Database('./database/employees.db', sqlite3.OPEN_READWRITE,
     console.log('Connected to the employees database.');
   });
 
-app.use(express.urlencoded({extended: false }));
-app.use(express.static(path.join(__dirname,'./public')));
-
 db.run('CREATE TABLE IF NOT EXISTS emp(id TEXT, name TEXT)');
-
+//Display interface
 app.get('/', function(req,res){
     res.sendFile(path.join(__dirname,'./public/index.html'));
   });
-
 // Insert
 app.post('/add', function(req,res){
     db.serialize(()=>{
@@ -34,8 +30,7 @@ app.post('/add', function(req,res){
       });
   });
   });
-  
-  // View
+// View
   app.post('/view', function(req,res){
     db.serialize(()=>{
       db.each('SELECT id ID, name NAME FROM emp WHERE id =?', [req.body.id], function(err,row){     //db.each() is only one which is funtioning while reading data from the DB
@@ -48,7 +43,6 @@ app.post('/add', function(req,res){
       });
     });
   });
-
 //Update
 app.post('/update', function(req,res){
     db.serialize(()=>{
@@ -62,8 +56,7 @@ app.post('/update', function(req,res){
       });
     });
   });
- 
-  //Delete
+//Delete
 app.post('/delete', function(req,res){
     db.serialize(()=>{
       db.run('DELETE FROM emp WHERE id = ?', req.body.id, function(err) {
@@ -76,7 +69,6 @@ app.post('/delete', function(req,res){
       });
     });
   });
-
   //Close
   app.get('/close', function(req,res){
     db.close((err) => {
@@ -89,6 +81,7 @@ app.post('/delete', function(req,res){
     });
   });
 
-  server.listen(3000,function(){ 
+  //server.listen(3000,function(){ 
+    app.listen(3000,()=>{
     console.log("Server listening on port: 3000");
   });
