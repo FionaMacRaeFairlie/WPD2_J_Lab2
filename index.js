@@ -1,7 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const express = require('express');
 const path = require("path");
-const { emitKeypressEvents } = require('readline');
 
 const app = express();
 app.use(express.urlencoded({extended: false }));
@@ -70,16 +69,21 @@ app.post('/delete', function(req,res){
       });
     });
   });
-  //Show All
-  app.post('/showAll', function(req,res){
-  db.serialize(()=>{
-  db.each("SELECT * FROM emp", function (err,row) {
-    console.log("Read  from DB : " + row.id + " : " + row.name );
-     });
-     res.send(`results in terminal window `);
-    });
-  });
-  //Close
+  app.post("/showAll",function (req, res) {
+    db.serialize(()=>{
+      db.all("SELECT * FROM emp", function(err, rows) {
+        if (err) {
+          res.status(400).json({"error":err.message});
+          return;
+        }
+        res.json({
+            "message":"success",
+            "data":rows
+        })
+        });
+      });
+});
+//Close
   app.get('/close', function(req,res){
     db.close((err) => {
       if (err) {
